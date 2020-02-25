@@ -24,7 +24,7 @@ This app is available as a [dotnet tool](https://docs.microsoft.com/en-us/dotnet
 ### dotnet tool
 To install this app as a dotnet tool run from command line
 ```bash
-dotnet tool install SiaConsulting.AppStoreConnect.Cli -g
+dotnet tool install SiaConsulting.AppStoreConnect.Cli --version 0.2.1 --no-cache --global
 ```
 ### self contained
 [Win x64](https://github.com/dersia/AppStoreConnect/releases/download/v0.2.1/appStoreConnect-win-x64.zip)

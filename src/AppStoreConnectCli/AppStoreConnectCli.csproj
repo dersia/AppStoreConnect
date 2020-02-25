@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>botsay</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <AssemblyName>appStoreConnect</AssemblyName>
+    <RootNamespace>AppStoreConnectCli</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>0.2.0.0</Version>
+    <Authors>Sia Consulting Ltd.</Authors>
+    <Product>AppStoreConnectCli</Product>
+    <PackageId>SiaConsulting.AppStoreConnect.Cli</PackageId>
+    <Description>Cli to interact with Apples AppStoreConnect API</Description>
+    <Copyright>2019 Sia Consulting Ltd.</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/dersia/AppStoreConnect</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dersia/AppStoreConnect.git</RepositoryUrl>
+    <RepositoryType>github</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AppStoreConnect.Jwt\AppStoreConnect.Jwt.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\\..\\LICENSE" Pack="true" PackagePath="" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BouncyCastle" Version="1.8.5" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20104.2" />
+  </ItemGroup>
+
+</Project>

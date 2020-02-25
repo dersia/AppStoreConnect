@@ -1,9 +1,25 @@
 # AppStoreConnect
 
 This is a dotnet library and cli for interaction with Apples App Store Connect API.
+There are great tools like fastlane out there for automating Apple App creation and this tool does not try or can compete with all the features that fastlane offers.
+
+So why did I start this?
+There are two reasons:
+* Apples 2FA
+* Cli
+
+#### Apples 2FA
+Apple is moving to 2FA for all Apple developer accounts, unfortunatley although this is great for security it is really bad for automated pipelines. Fastlane is solving this so far by using a second account that does not have a `ACCOUNT_HOLDER` flag and tunred off 2FA.
+This is probelematic, if you don't own a Organizational or Enterprise Apple Developer Account and of course turning off 2FA is always a bad idea when it comes to security.
+To avoid this, this tool works with Apples App Store Connect-API and Bearer Tokens.
+
+#### Cli
+Even though I like what fastlane is doing, I really don't like the pipeline i have to set up for it (Installing ruby, installing fastlane, etc.) And for what I am trying to achieve fastlane does way too much. And there are also the limitations for some features that only work on a Mac.
+To be clear though, this tool does not give you as many features as fastlane does!
+Afterall I wanted to have a small easy to use command line tool. 
 
 ## Install
-This app is available as a [dotnet tool](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-tool-install) and as a self contained executeable for Windows and MacOS
+This app is available as a [dotnet tool](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-tool-install) and as a self contained executeable for Linux, Windows and MacOS
 
 ### dotnet tool
 To install this app as a dotnet tool run from command line
@@ -11,9 +27,11 @@ To install this app as a dotnet tool run from command line
 dotnet tool install SiaConsulting.AppStoreConnect.Cli -g
 ```
 ### self contained
-[Win x64]()
+[Win x64](https://github.com/dersia/AppStoreConnect/releases/download/v0.2/appStoreConnect-win-x64.zip)
 
-[MacOS]()
+[MacOS](https://github.com/dersia/AppStoreConnect/releases/download/v0.2/appStoreConnect-osx-x64.zip)
+
+[Linux](https://github.com/dersia/AppStoreConnect/releases/download/v0.2/appStoreConnect-linux-x64.tar.gz)
 
 ## Usage
 
@@ -315,4 +333,4 @@ list all deviceIds linked to a profile
 ```
 
 ## Future plans
-In the future APIs for TestFlight and Reporting Endpoints will be added.
+In the future APIs for TestFlight and Reporting-Endpoints will be added.

@@ -7,7 +7,7 @@
     <AssemblyName>SiaConsulting.AppStoreConnect.Core</AssemblyName>
     <RootNamespace>AppStoreConnect</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.2.0.0</Version>
+    <Version>0.2.1.0</Version>
     <Authors>Sia Consulting Ltd.</Authors>
     <Product>AppStoreConnect Lib</Product>
     <PackageId>SiaConsulting.AppStoreConnect.Core</PackageId>

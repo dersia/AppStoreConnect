@@ -23,14 +23,14 @@ namespace AppStoreConnectCli.Commands
             var create = new Command("create", "create a new certificate");
             create.AddAlias("c");
             create.AddArgument(new Argument<string>("csrContent"));
-            create.AddArgument(new Argument<CertificateTypes>("type"));
+            create.AddOption(new Option<CertificateTypes>("--type") { Argument = new Argument<CertificateTypes> { Arity = ArgumentArity.ExactlyOne } });
             create.AddSubCommandArgument();
             create.Handler = CommandHandler.Create(typeof(Certificates).GetMethod(nameof(CreateFromCsr)));
 
             var createFromFile = new Command("createFromFile", "create a new certificate from certificate json file");
             createFromFile.AddAlias("cfile");
             createFromFile.AddAlias("cf");
-            createFromFile.AddArgument(new Argument<CertificateTypes>("type"));
+            createFromFile.AddOption(new Option<CertificateTypes>("--type") { Argument = new Argument<CertificateTypes> { Arity = ArgumentArity.ExactlyOne } });
             createFromFile.AddSubCommandArgument();
             createFromFile.AddArgument(new Argument<FileInfo>("file"));
             createFromFile.Handler = CommandHandler.Create(typeof(Certificates).GetMethod(nameof(CreateFromCsrFile)));
@@ -77,70 +77,58 @@ namespace AppStoreConnectCli.Commands
             return certificates;
         }
 
-        public static async Task Revoke(string certificateId, string token)
+        public static async Task Revoke(string certificateId, string token, bool outJson)
         {
-            var result = await token.GetClient().Certificates.RevokeCertificate("certificateId");
+            var result = await token.GetClient().Certificates.RevokeCertificate(certificateId);
             result.Handle<NoContentResponse>(res =>
             {
-                Console.WriteLine($"Revoked certificate '{certificateId}'");
-            });
+                res.Print(() => Console.WriteLine($"Revoked certificate '{certificateId}'"), outJson);
+            }, outJson);
         }
 
-        public static async Task List(string token)
+        public static async Task List(string token, bool outJson)
         {
             var result = await token.GetClient().Certificates.ListCertificates();
             result.Handle<CertificatesResponse>(res =>
             {
-                if (res.Certificates is null || !res.Certificates.Any())
-                {
-                    Console.WriteLine("No Certificates");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var certificate in res.Certificates)
-                    {
-                        Console.WriteLine($"------------ Cert {++count} ----------");
-                        certificate?.Print(false);
-                    }
-                }
-            });
+                res.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task GetContent(string certificateId, string token)
+        public static async Task GetContent(string certificateId, string token, bool outJson)
         {
             var result = await token.GetClient().Certificates.GetCertificate(certificateId);
             result.Handle<CertificateResponse>(res =>
             {
                 Console.WriteLine(res.CertificateInformation?.Certificate?.CertificateContent);
-            });
+            }, outJson);
         }
 
-        public static async Task GetEntry(string certificateId, string token)
+        public static async Task GetEntry(string certificateId, string token, bool outJson)
         {
             var result = await token.GetClient().Certificates.GetCertificate(certificateId);
             result.Handle<CertificateResponse>(res =>
             {
-                res.CertificateInformation?.Print(false);
-            });
+                res.Print(outJson, false);
+            }, outJson);
         }
 
-        public static async Task Get(string certificateId, string token)
+        public static async Task Get(string certificateId, string token, bool outJson)
         {
             var result = await token.GetClient().Certificates.GetCertificate(certificateId);
             result.Handle<CertificateResponse>(res =>
             {
-                res.CertificateInformation?.Print();
-            });
+                res.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task CreateFromCsrFile(CertificateTypes type, FileInfo file, string token)
+        public static async Task CreateFromCsrFile(CertificateTypes type, FileInfo file, string token, bool outJson)
         {
             var csr = await file.OpenText().ReadToEndAsync();
-            await CreateFromCsr(csr, type, token);
+            await CreateFromCsr(csr, type, token, outJson);
         }
 
-        public static async Task CreateFromCsr(string csrContent, CertificateTypes type, string token)
+        public static async Task CreateFromCsr(string csrContent, CertificateTypes type, string token, bool outJson)
         {
             if (string.IsNullOrWhiteSpace(csrContent))
             {
@@ -163,8 +151,8 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().Certificates.CreateCertificate(payload);
             result.Handle<CertificateResponse>(res =>
             {
-                res.CertificateInformation?.Print(false);
-            });
+                res.Print(outJson, false);
+            }, outJson);
         }
     }
 }

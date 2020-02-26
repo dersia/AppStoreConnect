@@ -26,7 +26,7 @@ namespace AppStoreConnectCli.Commands
             var create = new Command("create", "create a new profile");
             create.AddAlias("c");
             create.AddArgument(new Argument<string>("name"));
-            create.AddArgument(new Argument<ProfileType>("type"));
+            create.AddOption(new Option<ProfileType>("--type") { Argument = new Argument<ProfileType> { Arity = ArgumentArity.ExactlyOne } });
             create.AddOption(new Option<string[]>("--deviceId") { Argument = new Argument<string[]>() { Arity = ArgumentArity.OneOrMore } });
             create.AddOption(new Option<string[]>("--certificateId") { Argument = new Argument<string[]>() { Arity = ArgumentArity.OneOrMore } });
             create.AddOption(new Option<string>("--bundleIdId") { Argument = new Argument<string>() { Arity = ArgumentArity.ExactlyOne } });
@@ -133,166 +133,106 @@ namespace AppStoreConnectCli.Commands
             return profiles;
         }
 
-        public static async Task DeviceIds(string profileId, string token)
+        public static async Task DeviceIds(string profileId, string token, bool outJson)
         {
             var result = await token.GetClient().Profiles.GetLinkedDeviceIds(profileId);
             result.Handle<ProfileDevicesLinkagesResponse>(res =>
             {
-                if (res.Devices is null || !res.Devices.Any())
-                {
-                    Console.WriteLine("No Devices");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var device in res.Devices)
-                    {
-                        Console.WriteLine($"------------ Device {++count} ----------");
-                        device?.Print();
-                    }
-                }
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Devices(string profileId, string token)
+        public static async Task Devices(string profileId, string token, bool outJson)
         {
             var result = await token.GetClient().Profiles.GetLinkedDevices(profileId);
             result.Handle<DevicesResponse>(res =>
             {
-                if (res.Devices is null || !res.Devices.Any())
-                {
-                    Console.WriteLine("No Devices");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var device in res.Devices)
-                    {
-                        Console.WriteLine($"------------ Device {++count} ----------");
-                        device?.Print();
-                    }
-                }
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task CertificateIds(string profileId, string token)
+        public static async Task CertificateIds(string profileId, string token, bool outJson)
         {
             var result = await token.GetClient().Profiles.GetLinkedCertificateIds(profileId);
             result.Handle<ProfileCertificatesLinkagesResponse>(res =>
             {
-                if (res.Certificates is null || !res.Certificates.Any())
-                {
-                    Console.WriteLine("No Certificates");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var certificate in res.Certificates)
-                    {
-                        Console.WriteLine($"------------ Certificate {++count} ----------");
-                        certificate?.Print();
-                    }
-                }
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Certificates(string profileId, string token)
+        public static async Task Certificates(string profileId, string token, bool outJson)
         {
             var result = await token.GetClient().Profiles.GetLinkedCertificates(profileId);
             result.Handle<CertificatesResponse>(res =>
             {
-                if (res.Certificates is null || !res.Certificates.Any())
-                {
-                    Console.WriteLine("No Certificates");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var certificate in res.Certificates)
-                    {
-                        Console.WriteLine($"------------ Certificate {++count} ----------");
-                        certificate?.Print(false);
-                    }
-                }
-            });
+                res?.Print(outJson, false);
+            }, outJson);
         }
 
-        public static async Task BundleIdId(string profileId, string token)
+        public static async Task BundleIdId(string profileId, string token, bool outJson)
         {
             var result = await token.GetClient().Profiles.GetLinkedBundleIdId(profileId);
             result.Handle<ProfileBundleIdLinkageResponse>(res =>
             {
-                res.BundleIdId?.Print();
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task BundleId(string profileId, string token)
+        public static async Task BundleId(string profileId, string token, bool outJson)
         {
             var result = await token.GetClient().Profiles.GetLinkedBundleId(profileId);
             result.Handle<BundleIdResponse>(res =>
             {
-                res.BundleIdInformation?.Print();
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task List(string token)
+        public static async Task List(string token, bool outJson)
         {
             var result = await token.GetClient().Profiles.ListProfiles();
             result.Handle<ProfilesResponse>(res =>
             {
-                if (res.Profiles is null || !res.Profiles.Any())
-                {
-                    Console.WriteLine("No Profiles");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var profile in res.Profiles)
-                    {
-                        Console.WriteLine($"------------ Profile {++count} ----------");
-                        profile?.Print(false);
-                    }
-                }
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task GetEntry(string profileId, string token)
+        public static async Task GetEntry(string profileId, string token, bool outJson)
         {
             var result = await token.GetClient().Profiles.GetProfile(profileId);
             result.Handle<ProfileResponse>(res =>
             {
-                res?.ProfileInformation?.Print(false);
-            });
+                res?.Print(outJson, false);
+            }, outJson);
         }
 
-        public static async Task GetContent(string profileId, string token)
+        public static async Task GetContent(string profileId, string token, bool outJson)
         {
             var result = await token.GetClient().Profiles.GetProfile(profileId);
             result.Handle<ProfileResponse>(res =>
             {
                 Console.WriteLine(res.ProfileInformation?.Profile?.ProfileContent);
-            });
+            }, outJson);
         }
 
-        public static async Task Get(string profileId, string token)
+        public static async Task Get(string profileId, string token, bool outJson)
         {
             var result = await token.GetClient().Profiles.GetProfile(profileId);
             result.Handle<ProfileResponse>(res =>
             {
-                res?.ProfileInformation?.Print();
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Delete(string profileId, string token)
+        public static async Task Delete(string profileId, string token, bool outJson)
         {
             var result = await token.GetClient().Profiles.DeleteProfile(profileId);
             result.Handle<NoContentResponse>(res =>
             {
-                Console.WriteLine($"Profile '{profileId}' deleted");
-            });
+                res?.Print(() => { Console.WriteLine($"Profile '{profileId}' deleted"); }, outJson);
+            }, outJson);
         }
 
-        public static async Task Create(string name, ProfileType type, string token, string[] deviceId, string[] certificateId, string bundleIdId)
+        public static async Task Create(string name, ProfileType type, string token, string[] deviceId, string[] certificateId, string bundleIdId, bool outJson)
         {
             var profile = new AppStoreConnect.Models.Pocos.Profiles.Profile
             {
@@ -323,21 +263,20 @@ namespace AppStoreConnectCli.Commands
                     }
                 }
             };
-            Console.WriteLine(JsonSerializer.Serialize(payload, new JsonSerializerOptions { IgnoreNullValues = true }));
             var result = await token.GetClient().Profiles.CreateProfile(payload);
             result.Handle<ProfileResponse>(res =>
             {
-                res.ProfileInformation?.Print(false);
-            });
+                res?.Print(outJson, false);
+            }, outJson);
         }
 
-        public static async Task CreateFromFile(FileInfo file, string token)
+        public static async Task CreateFromFile(FileInfo file, string token, bool outJson)
         {
             var json = await file.OpenText().ReadToEndAsync();
-            await CreateFromJson(json, token);
+            await CreateFromJson(json, token, outJson);
         }
 
-        public static async Task CreateFromJson(string json, string token)
+        public static async Task CreateFromJson(string json, string token, bool outJson)
         {
             ProfileCreateRequest? payload = null;
             try
@@ -356,8 +295,8 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().Profiles.CreateProfile(payload);
             result.Handle<ProfileResponse>(res =>
             {
-                res?.ProfileInformation?.Print(false);
-            });
+                res?.Print(outJson, false);
+            }, outJson);
         }
     }
 }

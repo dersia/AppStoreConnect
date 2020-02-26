@@ -14,7 +14,7 @@ namespace AppStoreConnectCli.CertificateTools
 {
     public class CertUtil
     {
-        public Pkcs10CertificationRequest CreateCertificateSigningRequestInteractive()
+        public Pkcs10CertificationRequest CreateCertificateSigningRequestInteractive(int keyLength)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Creating a Certificate Signing Request");
@@ -25,7 +25,7 @@ namespace AppStoreConnectCli.CertificateTools
             var unit = GetOrganizationalUnit();
             var commonName = GetCommonName();
             var email = GetEmailAddress();
-            var csr = CreateCertificateSigningRequest(commonName, countryCode, email, stateOrProvince, localityOrCity, company, unit);
+            var csr = CreateCertificateSigningRequest(commonName, countryCode, email, stateOrProvince, localityOrCity, company, unit, keyLength);
             Console.ResetColor();
             return csr;
 
@@ -91,6 +91,10 @@ namespace AppStoreConnectCli.CertificateTools
 
         public Pkcs10CertificationRequest CreateCertificateSigningRequest(string commonName, string countryCode, string? emailAddress, string? stateOrProvince = null, string? localityOrCity = null, string? companyName = null, string? unit = null, int keyLength = 2048)
         {
+            if(keyLength < 1)
+            {
+                keyLength = 2048;
+            }
             using var key = RSA.Create(keyLength);
             var builder = new StringBuilder($"CN={commonName}, C={countryCode}");
             if(!string.IsNullOrWhiteSpace(stateOrProvince))

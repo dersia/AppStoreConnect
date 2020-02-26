@@ -161,7 +161,7 @@ namespace AppStoreConnectCli.Commands
             return users;
         }
 
-        public static async Task AddApps(string userId, Data[] apps, string token)
+        public static async Task AddApps(string userId, Data[] apps, string token, bool outJson)
         {
             var payload = new UserVisibleAppsLinkagesRequest()
             {
@@ -170,11 +170,11 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().Users.AddVisibleAppsToUser(userId, payload);
             result.Handle<NoContentResponse>(res =>
             {
-                Console.WriteLine($"Replaced '{apps.Length}' Apps for User '{userId}'");
-            });
+                res?.Print(() => Console.WriteLine($"Replaced '{apps.Length}' Apps for User '{userId}'"), outJson);
+            }, outJson);
         }
 
-        public static async Task RemoveApps(string userId, Data[] apps, string token)
+        public static async Task RemoveApps(string userId, Data[] apps, string token, bool outJson)
         {
             var payload = new UserVisibleAppsLinkagesRequest()
             {
@@ -183,11 +183,11 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().Users.RemoveVisibleAppsFromUser(userId, payload);
             result.Handle<NoContentResponse>(res =>
             {
-                Console.WriteLine($"Replaced '{apps.Length}' Apps for User '{userId}'");
-            });
+                res?.Print(() => Console.WriteLine($"Replaced '{apps.Length}' Apps for User '{userId}'"), outJson);
+            }, outJson);
         }
 
-        public static async Task ReplaceApps(string userId, Data[] apps, string token)
+        public static async Task ReplaceApps(string userId, Data[] apps, string token, bool outJson)
         {
             var payload = new UserVisibleAppsLinkagesRequest()
             {
@@ -196,89 +196,53 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().Users.ReplaceVisibleAppsForUser(userId, payload);
             result.Handle<NoContentResponse>(res =>
             {
-                Console.WriteLine($"Replaced '{apps.Length}' Apps for User '{userId}'");
-            });
+                res?.Print(() => Console.WriteLine($"Replaced '{apps.Length}' Apps for User '{userId}'"), outJson);
+            }, outJson);
         }
 
-        public static async Task AppIds(string userId, string token)
+        public static async Task AppIds(string userId, string token, bool outJson)
         {
             var result = await token.GetClient().Users.GetLinkedVisibleAppIds(userId);
             result.Handle<UserVisibleAppsLinkagesResponse>(res =>
             {
-                if (res.LinkedVisibleApps is null || !res.LinkedVisibleApps.Any())
-                {
-                    Console.WriteLine("No Apps");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var app in res.LinkedVisibleApps)
-                    {
-                        Console.WriteLine($"------------ Apps {++count} ----------");
-                        app?.Print();
-                    }
-                }
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Apps(string userId, string token)
+        public static async Task Apps(string userId, string token, bool outJson)
         {
             var result = await token.GetClient().Users.GetLinkedVisibleApps(userId);
             result.Handle<AppsResponse>(res =>
             {
-                if (res.AppInformations is null || !res.AppInformations.Any())
-                {
-                    Console.WriteLine("No Apps");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var app in res.AppInformations)
-                    {
-                        Console.WriteLine($"------------ Apps {++count} ----------");
-                        app?.Print();
-                    }
-                }
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Delete(string userId, string token)
+        public static async Task Delete(string userId, string token, bool outJson)
         {
             var result = await token.GetClient().Users.DeleteUser(userId);
             result.Handle<NoContentResponse>(res =>
             {
-                Console.WriteLine($"User '{userId}' delete");
-            });
+                res?.Print(() => Console.WriteLine($"User '{userId}' delete"), outJson);
+            }, outJson);
         }
 
-        public static async Task List(string token)
+        public static async Task List(string token, bool outJson)
         {
             var result = await token.GetClient().Users.GetUsers();
             result.Handle<UsersResponse>(res =>
             {
-                if (res.Users is null || !res.Users.Any())
-                {
-                    Console.WriteLine("No Users");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var user in res.Users)
-                    {
-                        Console.WriteLine($"------------ user {++count} ----------");
-                        user?.Print();
-                    }
-                }
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Get(string userId, string token)
+        public static async Task Get(string userId, string token, bool outJson)
         {
             var result = await token.GetClient().Users.GetUser(userId);
-            result.Handle<UserResponse>(res => res.User?.Print());
+            result.Handle<UserResponse>(res => res?.Print(outJson), outJson);
         }
 
-        public static async Task Update(string userId, string firstName, string lastName, UserRoles[] roles, bool? allowProvivioning, bool? canSeeAllApps, string token)
+        public static async Task Update(string userId, string firstName, string lastName, UserRoles[] roles, bool? allowProvivioning, bool? canSeeAllApps, string token, bool outJson)
         {
             var user = new AppStoreConnect.Models.Pocos.Users.User
             {
@@ -306,16 +270,16 @@ namespace AppStoreConnectCli.Commands
                 }
             };
             var result = await token.GetClient().Users.UpdateUser(userId, payload);
-            result.Handle<UserResponse>(res => res.User?.Print());
+            result.Handle<UserResponse>(res => res?.Print(outJson), outJson);
         }
 
-        public static async Task UpdateFromFile(string userId, FileInfo file, string token)
+        public static async Task UpdateFromFile(string userId, FileInfo file, string token, bool outJson)
         {
             var json = await file.OpenText().ReadToEndAsync();
-            await UpdateFromJson(userId, json, token);
+            await UpdateFromJson(userId, json, token, outJson);
         }
 
-        public static async Task UpdateFromJson(string userId, string json, string token)
+        public static async Task UpdateFromJson(string userId, string json, string token, bool outJson)
         {
             UserUpdateRequest? payload = null;
             try
@@ -354,17 +318,17 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().Users.UpdateUser(userId, payload);
             result.Handle<UserResponse>(res =>
             {
-                res?.User?.Print();
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task ReplaceAppsFromFile(string userId, FileInfo file, string token)
+        public static async Task ReplaceAppsFromFile(string userId, FileInfo file, string token, bool outJson)
         {
             var json = await file.OpenText().ReadToEndAsync();
-            await ReplaceAppsFromJson(userId, json, token);
+            await ReplaceAppsFromJson(userId, json, token, outJson);
         }
 
-        public static async Task ReplaceAppsFromJson(string userId, string json, string token)
+        public static async Task ReplaceAppsFromJson(string userId, string json, string token, bool outJson)
         {
             UserVisibleAppsLinkagesRequest? payload = null;
             try
@@ -398,17 +362,17 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().Users.ReplaceVisibleAppsForUser(userId, payload);
             result.Handle<NoContentResponse>(res =>
             {
-                Console.WriteLine($"Replaced '{apps?.Count}' Apps for User '{userId}'");
-            });
+                res?.Print(() => Console.WriteLine($"Replaced '{apps?.Count}' Apps for User '{userId}'"), outJson);
+            }, outJson);
         }
 
-        public static async Task RemoveAppsFromFile(string userId, FileInfo file, string token)
+        public static async Task RemoveAppsFromFile(string userId, FileInfo file, string token, bool outJson)
         {
             var json = await file.OpenText().ReadToEndAsync();
-            await RemoveAppsFromJson(userId, json, token);
+            await RemoveAppsFromJson(userId, json, token, outJson);
         }
 
-        public static async Task RemoveAppsFromJson(string userId, string json, string token)
+        public static async Task RemoveAppsFromJson(string userId, string json, string token, bool outJson)
         {
             UserVisibleAppsLinkagesRequest? payload = null;
             try
@@ -442,17 +406,17 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().Users.RemoveVisibleAppsFromUser(userId, payload);
             result.Handle<NoContentResponse>(res =>
             {
-                Console.WriteLine($"Replaced '{apps?.Count}' Apps for User '{userId}'");
-            });
+                res?.Print(() => Console.WriteLine($"Replaced '{apps?.Count}' Apps for User '{userId}'"), outJson);
+            }, outJson);
         }
 
-        public static async Task AddAppsFromFile(string userId, FileInfo file, string token)
+        public static async Task AddAppsFromFile(string userId, FileInfo file, string token, bool outJson)
         {
             var json = await file.OpenText().ReadToEndAsync();
-            await AddAppsFromJson(userId, json, token);
+            await AddAppsFromJson(userId, json, token, outJson);
         }
 
-        public static async Task AddAppsFromJson(string userId, string json, string token)
+        public static async Task AddAppsFromJson(string userId, string json, string token, bool outJson)
         {
             UserVisibleAppsLinkagesRequest? payload = null;
             try
@@ -484,7 +448,10 @@ namespace AppStoreConnectCli.Commands
                 };
             }
             var result = await token.GetClient().Users.AddVisibleAppsToUser(userId, payload);
-            result.Handle<NoContentResponse>(res => Console.WriteLine($"Removed '{apps?.Count}' Apps for User '{userId}'"));
+            result.Handle<NoContentResponse>(res => 
+            {
+                res?.Print(() => Console.WriteLine($"Removed '{apps?.Count}' Apps for User '{userId}'"), outJson);
+            }, outJson);
         }
     }
 }

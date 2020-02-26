@@ -61,7 +61,7 @@ namespace AppStoreConnect.Endpoints.Devices
                 { StatusCode: 200 } br => JsonSerializer.Deserialize<DevicesResponse>(await br.Response.Content.ReadAsStringAsync()),
                 { StatusCode: 400 } br => JsonSerializer.Deserialize<ErrorResponse>(await br.Response.Content.ReadAsStringAsync()),
                 { StatusCode: 403 } br => JsonSerializer.Deserialize<ErrorResponse>(await br.Response.Content.ReadAsStringAsync()),
-                { StatusCode: _ } res => new InternalErrorResponse { Exception = new Exception(res.StatusCode.ToString()) },
+                { StatusCode: _ } res => await InternalErrorResponse.CreateFromResponseMessage(res.Response),
             };
         }
     }

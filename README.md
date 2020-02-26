@@ -45,8 +45,9 @@ Usage:
   appStoreConnect [options] [command]
 
 Options:
-  --version         Show version information
-  -?, -h, --help    Show help and usage information
+  -oj, --out-json
+  --version          Show version information
+  -?, -h, --help     Show help and usage information
 
 Commands:
   bundleIds                          create, update, list BundleIds
@@ -81,7 +82,8 @@ Usage:
   appStoreConnect users [options] [command]
 
 Options:
-  -?, -h, --help    Show help and usage information
+  -oj, --out-json
+  -?, -h, --help     Show help and usage information
 
 Commands:
   u, update <userId> <firstName> <lastName> <roles> <token>       update a user by their id
@@ -90,8 +92,8 @@ Commands:
   g, get <userId> <token>                                         get a user by their id
   l, list <token>                                                 list all users
   d, delete <userId> <token>                                      delete a user by their id
-  apps, la, linkedApps, lla <userId> <token>                      list all apps linked to a user by their id
-  appIds, laid, linkedAppIds, llaid <userId> <token>              list all appIds linked to a user by their id
+  apps, linkedApps <userId> <token>                               list all apps linked to a user by their id
+  appIds, linkedAppIds <userId> <token>                           list all appIds linked to a user by their id
   replaceApps <userId> <apps> <token>                             replace apps for a user by their id
   replaceAppsFromJson, replaceAppsJson <userId> <token> <json>    replace apps for a user from List of Data json
   replaceAppsFile, replaceAppsFromFile <userId> <token> <file>    replace apps for a user from List of Data json file
@@ -101,7 +103,6 @@ Commands:
   addApps <userId> <apps> <token>                                 add apps for a user by their id
   addAppsFromJson, addAppsJson <userId> <token> <json>            add apps for a user from List of Data json
   addAppsFile, addAppsFromFile <userId> <token> <file>            add apps for a user from List of Data json file
-
 ```
 
 ### UserInvitaions
@@ -116,18 +117,18 @@ Usage:
   appStoreConnect userInvitations [options] [command]
 
 Options:
-  -?, -h, --help    Show help and usage information
+  -oj, --out-json
+  -?, -h, --help     Show help and usage information
 
 Commands:
-  i, invite <email> <firstName> <lastName> <token>                invite a user
-  ij, ijson, inviteFromJson <token> <json>                        invite a new user from userInvitation json
-  if, ifile, inviteFromFile <token> <file>                        invite a new user from userInvitation json file
-  g, get <userInvitationId> <token>                               get a user invitation by its id
-  l, list <token>                                                 list all userInvitations
-  c, cancel <userInvitationId> <token>                            cancel a userInvitation by its id
-  apps, la, linkedApps, lla <userInvitationId> <token>            list all apps linked to a userInvitation by its id
-  appIds, laid, linkedAppIds, llaid <userInvitationId> <token>    list all appIds linked to a userInvitation by its id
-
+  i, invite <email> <firstName> <lastName> <token>    invite a user
+  ij, ijson, inviteFromJson <token> <json>            invite a new user from userInvitation json
+  if, ifile, inviteFromFile <token> <file>            invite a new user from userInvitation json file
+  g, get <userInvitationId> <token>                   get a user invitation by its id
+  l, list <token>                                     list all userInvitations
+  c, cancel <userInvitationId> <token>                cancel a userInvitation by its id
+  apps, linkedApps <userInvitationId> <token>         list all apps linked to a userInvitation by its id
+  appIds, linkedAppIds <userInvitationId> <token>     list all appIds linked to a userInvitation by its id
 ```
 
 ### BundleId
@@ -142,21 +143,21 @@ Usage:
   appStoreConnect bundleIds [options] [command]
 
 Options:
-  -?, -h, --help    Show help and usage information
+  -oj, --out-json
+  -?, -h, --help     Show help and usage information
 
 Commands:
   l, list <token>
   g, get <bundleIdId> <token>
   r, register <identifier> <name> <IOS|MAC_OS|UNIVERSAL> <token>
-  registerFromJson, rj, rjson <token> <json>                                           register a new bundleId from bundleId json
-  registerFromFile, rf, rfile <token> <file>                                           register a new bundleId from bundleId json file
+  registerFromJson, rj, rjson <token> <json>                              register a new bundleId from bundleId json
+  registerFromFile, rf, rfile <token> <file>                              register a new bundleId from bundleId json file
   u, update <id> <token>
   d, delete <bundleIdId> <token>
-  capabilities, lbc, list-linkedBundleIdCapabilities, llbc <bundleIdId> <token>
-  capabilityIds, lbci, list-linkedBundleIdCapabilityIds, llbci <bundleIdId> <token>
-  list-linkedProfiles, llp, lp, profiles <bundleIdId> <token>                          lists all profiles for given bundleId (no-content)
-  list-linkedProfileIds, llpi, lpi, profileIds <bundleIdId> <token>
-
+  capabilities, list-linkedBundleIdCapabilities <bundleIdId> <token>      list all capabilities for given bundleId
+  capabilityIds, list-linkedBundleIdCapabilityIds <bundleIdId> <token>    list all capabilityIds for given bundleId
+  list-linkedProfiles, profiles <bundleIdId> <token>                      lists all profiles for given bundleId (no-content)
+  list-linkedProfileIds, profileIds <bundleIdId> <token>                  list all profileIds for given bundleId
 ```
 
 ### BundleIdCapability
@@ -171,13 +172,13 @@ Usage:
   appStoreConnect bundleIdCapability [options] [command]
 
 Options:
-  -?, -h, --help    Show help and usage information
+  -oj, --out-json
+  -?, -h, --help     Show help and usage information
 
 Commands:
   ej, ejson, enableFromJson <token> <json>    enable capability from BundleIdCapability json
   ef, efile, enableFromFile <token> <file>    enable capability from BundleIdCapability json file
   d, disable <capabilityId> <token>
-
 ```
 
 ### Devices
@@ -192,7 +193,8 @@ Usage:
   appStoreConnect devices [options] [command]
 
 Options:
-  -?, -h, --help    Show help and usage information
+  -oj, --out-json
+  -?, -h, --help     Show help and usage information
 
 Commands:
   r, register <name> <APPLE_TV|APPLE_WATCH|IPAD|IPHONE|IPOD|MAC> <IOS|MAC_OS|UNIVERSAL> <udid> <token>    register a new device
@@ -203,7 +205,6 @@ Commands:
   uf, ufile, updateFromFile <token> <deviceId> <file>                                                     update a device from device json file
   g, get <deviceId> <token>                                                                               get a device by its id
   l, list <token>                                                                                         list all devices
-
 ```
 
 ### Certificates
@@ -224,7 +225,7 @@ Organizational Unit [OU]:
 Common Name* [CN]: sia-consulting.eu
 Email Address [emailAddress]: info@sia-consulting.eu
 ```
-You can then create a certificate by calling `appStoreConnect.exe certificate createFromFile <CERTIFICATE-TYPE> <BEARER-TOKEN> ./certificate-request.csr`
+You can then create a certificate by calling `appStoreConnect.exe certificate createFromFile <BEARER-TOKEN> ./certificate-request.csr --type <CERTIFICATE-TYPE>`
 ```bash
 $ ./appStoreConnect.exe certificates cf
 Required argument missing for command: cf
@@ -233,14 +234,15 @@ createFromFile:
   create a new certificate from certificate json file
 
 Usage:
-  appStoreConnect certificates createFromFile [options] <type> <token> <file>
+  appStoreConnect certificates createFromFile [options] <token> <file>
 
 Arguments:
-  <DEVELOPER_ID_APPLICATION|DEVELOPER_ID_KEXT|DEVELOPMENT|IOS_DEVELOPMENT|IOS_DISTRIBUTION|MAC_APP_DEVELOPMENT|MAC_APP_DISTRIBUTION|MAC_INSTALLER_DISTRIBUTION>
   <token>
   <file>
 
 Options:
+  --type <DEVELOPER_ID_APPLICATION|DEVELOPER_ID_KEXT|DEVELOPMENT|IOS_DEVELOPMENT|IOS_DISTRIBUTION|MAC_APP_DEVELOPMENT|MAC_APP_DISTRIBUTION|MAC_INSTALLER_DISTRIBUTION>
+  -oj, --out-json
   -?, -h, --help    Show help and usage information
 ```
 After that you can download the Certificate (CER) from AppStoreConnect
@@ -256,7 +258,7 @@ $ ./appStoreConnect.exe tools cert p12FromFile ./certificate.cer --password <PAS
 
 Here is the help output of the certifiactes command
 ```bash
-dersia@DerSiaBook:/mnt/c/sources/AppStoreConnect/src/AppStoreConnectCli/bin/Debug/netcoreapp3.1$ ./appStoreConnect.exe certificates
+$ ./appStoreConnect.exe certificates
 Required command was not provided.
 
 certificates:
@@ -266,29 +268,22 @@ Usage:
   appStoreConnect certificates [options] [command]
 
 Options:
-  -?, -h, --help    Show help and usage information
+  -oj, --out-json
+  -?, -h, --help     Show help and usage information
 
 Commands:
-  c, create <csrContent> <DEVELOPER_ID_APPLICATION|DEVELOPER_ID_KEXT|DEVELOPMENT|IOS_DEVELOPMENT|IOS_DISTRIBUTION|MAC_APP_DEVELOPMENT|MAC_APP_DISTRIBUTION|MAC_INSTALLER_DISTRIBUTION> <token>
-create a new certificate
-  cf, cfile, createFromFile <DEVELOPER_ID_APPLICATION|DEVELOPER_ID_KEXT|DEVELOPMENT|IOS_DEVELOPMENT|IOS_DISTRIBUTION|MAC_APP_DEVELOPMENT|MAC_APP_DISTRIBUTION|MAC_INSTALLER_DISTRIBUTION> <token> <file>
-create a new certificate from certificate json file
-  g, get <certificateId> <token>
-get a certificate by its id
-  gc, getContent <certificateId> <token>
-get a certificate content by its id
-  ge, getEntry <certificateId> <token>
-get a certificate without its content by its id
-  l, list <token>
-list all certificates (no content)
-  r, revoke <certificateId> <token>
-revoke a certificate by its id
-
+  c, create <csrContent> <token>              create a new certificate
+  cf, cfile, createFromFile <token> <file>    create a new certificate from certificate json file
+  g, get <certificateId> <token>              get a certificate by its id
+  gc, getContent <certificateId> <token>      get a certificate content by its id
+  ge, getEntry <certificateId> <token>        get a certificate without its content by its id
+  l, list <token>                             list all certificates (no content)
+  r, revoke <certificateId> <token>           revoke a certificate by its id
 ```
 
 ### Profiles
 ```bash
-dersia@DerSiaBook:/mnt/c/sources/AppStoreConnect/src/AppStoreConnectCli/bin/Debug/netcoreapp3.1$ ./appStoreConnect.exe profiles
+$ ./appStoreConnect.exe profiles
 Required command was not provided.
 
 profiles:
@@ -298,38 +293,24 @@ Usage:
   appStoreConnect profiles [options] [command]
 
 Options:
-  -?, -h, --help    Show help and usage information
+  -oj, --out-json
+  -?, -h, --help     Show help and usage information
 
 Commands:
-  c, create <name> <IOS_APP_ADHOC|IOS_APP_DEVELOPMENT|IOS_APP_INHOUSE|IOS_APP_STORE|MAC_APP_DEVELOPMENT|MAC_APP_DIRECT|MAC_APP_STORE|TVOS_APP_ADHOC|TVOS_APP_DEVELOPMENT|TVOS_APP_INHOUSE|TVOS_APP_STORE> <token>
-create a new profile
-  cj, cjson, createFromJson <token> <json>
-create a new profile from profile json
-  cf, cfile, createFromFile <token> <file>
-create a new profile from profile json file
-  g, get <profileId> <token>
-get a profile by its id
-  gc, getContent <profileId> <token>
-get a profile content by its id
-  ge, getEntry <profileId> <token>
-get a profile by its id(without content)
-  l, list <token>
-list all profiles
-  d, delete <profileId> <token>
-delete a profile by its id
-  bundleId, lbi, linkedBundleId, llbi <profileId> <token>
-get bundleId linked to a profile
-  bundleIdId, lbiid, linkedBundleIdId, llbiid <profileId> <token>
-get bundleIdId linked to a profile
-  certificates, lc, linkedCertificates, llc <profileId> <token>
-list all certificates linked to a profile
-  certificateIds, lcid, linkedCertificateIds, llcid <profileId> <token>
-list all certificateIds linked to a profile
-  devices, ld, linkedDevices, lld <profileId> <token>
-list all devices linked to a profile
-  deviceIds, ldid, linkedDeviceIds, lldid <profileId> <token>
-list all deviceIds linked to a profile
-
+  c, create <name> <token>                                    create a new profile
+  cj, cjson, createFromJson <token> <json>                    create a new profile from profile json
+  cf, cfile, createFromFile <token> <file>                    create a new profile from profile json file
+  g, get <profileId> <token>                                  get a profile by its id
+  gc, getContent <profileId> <token>                          get a profile content by its id
+  ge, getEntry <profileId> <token>                            get a profile by its id (without content)
+  l, list <token>                                             list all profiles
+  d, delete <profileId> <token>                               delete a profile by its id
+  bundleId, linkedBundleId <profileId> <token>                get bundleId linked to a profile
+  bundleIdId, linkedBundleIdId <profileId> <token>            get bundleIdId linked to a profile
+  certificates, linkedCertificates <profileId> <token>        list all certificates linked to a profile
+  certificateIds, linkedCertificateIds <profileId> <token>    list all certificateIds linked to a profile
+  devices, linkedDevices <profileId> <token>                  list all devices linked to a profile
+  deviceIds, linkedDeviceIds <profileId> <token>              list all deviceIds linked to a profile
 ```
 
 ## Future plans

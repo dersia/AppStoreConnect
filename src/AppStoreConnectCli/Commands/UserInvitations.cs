@@ -27,7 +27,7 @@ namespace AppStoreConnectCli.Commands
             invite.AddArgument(new Argument<string>("lastName"));
             invite.AddSubCommandArgument();
             invite.AddOption(new Option<UserRoles[]>("--roles") { Argument = new Argument<UserRoles[]> { Arity = ArgumentArity.ZeroOrMore } });
-            invite.AddOption(new Option<bool?>("--allow-provivioning") { Argument = new Argument<bool?> { Arity = ArgumentArity.ZeroOrOne } });
+            invite.AddOption(new Option<bool?>("--allow-provisioning") { Argument = new Argument<bool?> { Arity = ArgumentArity.ZeroOrOne } });
             invite.AddOption(new Option<bool?>("--can-see-all-apps") { Argument = new Argument<bool?> { Arity = ArgumentArity.ZeroOrOne } });
             invite.Handler = CommandHandler.Create(typeof(UserInvitations).GetMethod(nameof(Invite)));
 
@@ -89,88 +89,52 @@ namespace AppStoreConnectCli.Commands
             return userInvitations;
         }
 
-        public static async Task AppIds(string userInvitationId, string token)
+        public static async Task AppIds(string userInvitationId, string token, bool outJson)
         {
             var result = await token.GetClient().UserInvitations.GetLinkedVisibleAppIds(userInvitationId);
             result.Handle<UserInvitationVisibleAppsLinkagesResponse>(res =>
             {
-                if (res.LinkedVisibleApps is null || !res.LinkedVisibleApps.Any())
-                {
-                    Console.WriteLine("No Apps");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var app in res.LinkedVisibleApps)
-                    {
-                        Console.WriteLine($"------------ Apps {++count} ----------");
-                        app?.Print();
-                    }
-                }
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Apps(string userInvitationId, string token)
+        public static async Task Apps(string userInvitationId, string token, bool outJson)
         {
             var result = await token.GetClient().UserInvitations.GetLinkedVisibleApps(userInvitationId);
             result.Handle<AppsResponse>(res =>
             {
-                if (res.AppInformations is null || !res.AppInformations.Any())
-                {
-                    Console.WriteLine("No Apps");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var app in res.AppInformations)
-                    {
-                        Console.WriteLine($"------------ Apps {++count} ----------");
-                        app?.Print();
-                    }
-                }
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Cancel(string userInvitationId, string token)
+        public static async Task Cancel(string userInvitationId, string token, bool outJson)
         {
             var result = await token.GetClient().UserInvitations.CancelUserInvitation(userInvitationId);
             result.Handle<NoContentResponse>(res =>
             {
-                Console.WriteLine($"UserInvitation '{userInvitationId}' canceled");
-            });
+                res?.Print(() => { Console.WriteLine($"UserInvitation '{userInvitationId}' canceled"); }, outJson);
+            }, outJson);
         }
 
-        public static async Task List(string token)
+        public static async Task List(string token, bool outJson)
         {
             var result = await token.GetClient().UserInvitations.ListUserInvitations();
             result.Handle<UserInvitationsResponse>(res =>
             {
-                if (res.UserInvitationInformations is null || !res.UserInvitationInformations.Any())
-                {
-                    Console.WriteLine("No UserInvitations");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var userInvitation in res.UserInvitationInformations)
-                    {
-                        Console.WriteLine($"------------ UserInvitations {++count} ----------");
-                        userInvitation?.Print();
-                    }
-                }
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Get(string userInvitationId, string token)
+        public static async Task Get(string userInvitationId, string token, bool outJson)
         {
             var result = await token.GetClient().UserInvitations.GetUserInvitation(userInvitationId);
             result.Handle<UserInvitationResponse>(res =>
             {
-                res.UserInvitationInformation?.Print();
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Invite(string email, string firstName, string lastName, UserRoles[]? roles, bool? allowProvivioning, bool? canSeeAllApps, string token)
+        public static async Task Invite(string email, string firstName, string lastName, UserRoles[]? roles, bool? allowProvisioning, bool? canSeeAllApps, string token, bool outJson)
         {
             var userInvitation = new AppStoreConnect.Models.Pocos.UserInvitations.UserInvitation
             {
@@ -178,7 +142,7 @@ namespace AppStoreConnectCli.Commands
                 FirstName = firstName,
                 LastName = lastName,
                 Roles = roles is { } ? new List<UserRoles>(roles) : null,
-                ProvisioningAllowed = allowProvivioning,
+                ProvisioningAllowed = allowProvisioning,
                 AllAppsVisible = canSeeAllApps
             };
             var payload = new UserInvitationCreateRequest()
@@ -189,21 +153,20 @@ namespace AppStoreConnectCli.Commands
                     UserInvitation = userInvitation
                 }
             };
-            Console.WriteLine(JsonSerializer.Serialize(payload, new JsonSerializerOptions { IgnoreNullValues = true }));
             var result = await token.GetClient().UserInvitations.InviteUser(payload);
             result.Handle<UserInvitationResponse>(res =>
             {
-                res.UserInvitationInformation?.Print();
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task InviteFromFile(FileInfo file, string token)
+        public static async Task InviteFromFile(FileInfo file, string token, bool outJson)
         {
             var json = await file.OpenText().ReadToEndAsync();
-            await InviteFromJson(json, token);
+            await InviteFromJson(json, token, outJson);
         }
 
-        public static async Task InviteFromJson(string json, string token)
+        public static async Task InviteFromJson(string json, string token, bool outJson)
         {
             UserInvitationCreateRequest? payload = null;
             try
@@ -241,8 +204,8 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().UserInvitations.InviteUser(payload);
             result.Handle<UserInvitationResponse>(res =>
             {
-                res?.UserInvitationInformation?.Print();
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
     }
 }

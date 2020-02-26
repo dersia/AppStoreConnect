@@ -67,7 +67,7 @@ namespace AppStoreConnectCli.Commands
             };
         }
 
-        public static async Task Disable(string token, string capabilityId)
+        public static async Task Disable(string token, string capabilityId, bool outJson)
         {
             if (capabilityId is null)
             {
@@ -78,17 +78,17 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().BundleIdCapabilities.DisableCapability(capabilityId);
             result.Handle<NoContentResponse>(res =>
             {
-                Console.WriteLine($"capability '{capabilityId}' disabled");
-            });
+                res?.Print(() => Console.WriteLine($"capability '{capabilityId}' disabled"), outJson);
+            }, outJson);
         }
 
-        public static async Task EnableFromFile(FileInfo file, string token)
+        public static async Task EnableFromFile(FileInfo file, string token, bool outJson)
         {
             var json = await file.OpenText().ReadToEndAsync();
-            await EnableFromJson(json, token);
+            await EnableFromJson(json, token, outJson);
         }
 
-        public static async Task EnableFromJson(string json, string token)
+        public static async Task EnableFromJson(string json, string token, bool outJson)
         {
             BundleIdCapabilityCreateRequest? payload = null;
             BundleIdCapability? capability = null;
@@ -122,17 +122,17 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().BundleIdCapabilities.EnableCapability(payload);
             result.Handle<BundleIdCapabilityResponse>(res =>
             {
-                res.BundleIdCapability?.Print();
-            });
+                res.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task ModifyFromFile(string capabilityId, FileInfo file, string token)
+        public static async Task ModifyFromFile(string capabilityId, FileInfo file, string token, bool outJson)
         {
             var json = await file.OpenText().ReadToEndAsync();
-            await ModifyFromJson(capabilityId, json, token);
+            await ModifyFromJson(capabilityId, json, token, outJson);
         }
 
-        public static async Task ModifyFromJson(string capabilityId, string json, string token)
+        public static async Task ModifyFromJson(string capabilityId, string json, string token, bool outJson)
         {
             BundleIdCapabilityUpdateRequest? payload = null;
             BundleIdCapability? capability = null;
@@ -166,8 +166,8 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().BundleIdCapabilities.ModifyCapability(capabilityId, payload);
             result.Handle<BundleIdCapabilityResponse>(res =>
             {
-                res.BundleIdCapability?.Print();
-            });
+                res.Print(outJson);
+            }, outJson);
         }
     }
 }

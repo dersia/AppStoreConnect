@@ -24,7 +24,23 @@ namespace AppStoreConnectCli.Common
                         .FromToken(token)
                         .Build();
 
-        public static async Task Handle<T>(this ApplicationResponse result, Func<T, Task> action)
+        public static void Handle<T>(this ApplicationResponse result, Action<T> action, bool outJson)
+        {
+            if (result is T res)
+            {
+                action(res);
+            }
+            else if (result is InternalErrorResponse err)
+            {
+                err.Print(outJson);
+            }
+            else if (result is ErrorResponse errRes)
+            {
+                errRes.Print(outJson);
+            }
+        }
+
+        public static async Task Handle<T>(this ApplicationResponse result, Func<T, Task> action, bool outJson)
         {
             if (result is T res)
             {
@@ -32,34 +48,11 @@ namespace AppStoreConnectCli.Common
             }
             else if (result is InternalErrorResponse err)
             {
-                err.Print();
-            }
-            else if(result is ErrorResponse errRes)
-            {
-                errRes.Print();
-            }
-        }
-
-        public static void Handle<T>(this ApplicationResponse result, Action<T> action, bool? outJson = null)
-        {
-            if (result is T res)
-            {
-                if (outJson is bool oj && oj)
-                {
-                    Console.WriteLine(JsonSerializer.Serialize(oj, new JsonSerializerOptions { IgnoreNullValues = true }));
-                }
-                else
-                {
-                    action(res);
-                }
-            }
-            else if (result is InternalErrorResponse err)
-            {
-                err.Print();
+                err.Print(outJson);
             }
             else if (result is ErrorResponse errRes)
             {
-                errRes.Print();
+                errRes.Print(outJson);
             }
         }
     }

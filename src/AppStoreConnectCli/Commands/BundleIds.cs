@@ -129,100 +129,52 @@ namespace AppStoreConnectCli.Commands
             };
         }
 
-        public static async Task ProfileIds(string token, string bundleIdId)
+        public static async Task ProfileIds(string token, string bundleIdId, bool outJson)
         {
             var result = await token.GetClient().BundleIds.GetLinkedProfileIds(bundleIdId);
             result.Handle<BundleIdProfilesLinkagesResponse>(res =>
             {
-                if (res.LinkedProfileIds is null || !res.LinkedProfileIds.Any())
-                {
-                    Console.WriteLine("No Profiles");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var profile in res.LinkedProfileIds)
-                    {
-                        Console.WriteLine($"------------ Profile {++count} ----------");
-                        profile?.Print();
-                    }
-                }
-            });
+                res.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Profiles(string token, string bundleIdId)
+        public static async Task Profiles(string token, string bundleIdId, bool outJson)
         {
             var result = await token.GetClient().BundleIds.GetLinkedProfiles(bundleIdId);
             result.Handle<ProfilesResponse>(res =>
             {
-                if (res.Profiles is null || !res.Profiles.Any())
-                {
-                    Console.WriteLine("No Profiles");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var profile in res.Profiles)
-                    {
-                        Console.WriteLine($"------------ Profile {++count} ----------");
-                        profile?.Print(false);
-                    }
-                }
-            });
+                res.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task CapabilityIds(string token, string bundleIdId)
+        public static async Task CapabilityIds(string token, string bundleIdId, bool outJson)
         {
             var result = await token.GetClient().BundleIds.GetLinkedBundleIdCapabilityIds(bundleIdId);
             result.Handle<BundleIdBundleIdCapabilitiesLinkagesResponse>(res =>
             {
-                if (res.BundleIdCapabilityIds is null || !res.BundleIdCapabilityIds.Any())
-                {
-                    Console.WriteLine("No Capabilities");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var capability in res.BundleIdCapabilityIds)
-                    {
-                        Console.WriteLine($"------------ Capability {++count} ----------");
-                        capability?.Print();
-                    }
-                }
-            });
+                res.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Capabilities(string token, string bundleIdId)
+        public static async Task Capabilities(string token, string bundleIdId, bool outJson)
         {
             var result = await token.GetClient().BundleIds.GetLinkedBundleIdCapabilities(bundleIdId);
             result.Handle<BundleIdCapabilitiesResponse>(res =>
             {
-                if (res.BundleIdCapabilities is null || !res.BundleIdCapabilities.Any())
-                {
-                    Console.WriteLine("No Capabilities");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var capability in res.BundleIdCapabilities)
-                    {
-                        Console.WriteLine($"------------ Capability {++count} ----------");
-                        capability?.Print();
-                    }
-                }
-            });
+                res.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Delete(string token, string bundleIdId)
+        public static async Task Delete(string token, string bundleIdId, bool outJson)
         {
             var result = await token.GetClient().BundleIds.DeleteBundleId(bundleIdId);
             result.Handle<NoContentResponse>(res =>
             {
-                Console.WriteLine($"BundleId '{bundleIdId}' deleted");
-            });
+                res.Print(() => Console.WriteLine($"BundleId '{bundleIdId}' deleted"), outJson);
+            }, outJson);
         }
 
-        public static async Task Update(string token, string id, string? name)
+        public static async Task Update(string token, string id, string? name, bool outJson)
         {
             var bundleId = new AppStoreConnect.Models.Pocos.BundleIds.BundleId();
             if (!string.IsNullOrWhiteSpace(name))
@@ -241,11 +193,11 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().BundleIds.UpdateBundleId(id, payload);
             result.Handle<BundleIdResponse>(res =>
             {
-                res.BundleIdInformation.Print();
-            });
+                res.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Register(string token, string identifier, string name, BundleIdPlatform platform)
+        public static async Task Register(string token, string identifier, string name, BundleIdPlatform platform, bool outJson)
         {
             var payload = new AppStoreConnect.Models.Requests.BundleIds.BundleIdCreateRequest
             {
@@ -260,51 +212,38 @@ namespace AppStoreConnectCli.Commands
                     Type = ResourceTypes.bundleIds
                 }
             };
-            Console.WriteLine(JsonSerializer.Serialize(payload, new JsonSerializerOptions { IgnoreNullValues = true }));
             var result = await token.GetClient().BundleIds.RegisterBundleId(payload);
             result.Handle<BundleIdResponse>(res =>
             {
-                res.BundleIdInformation.Print();
-            });
+                res.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Get(string bundleIdId, string token)
+        public static async Task Get(string bundleIdId, string token, bool outJson)
         {
             var result = await token.GetClient().BundleIds.GetBundleId(bundleIdId);
             result.Handle<BundleIdResponse>(res =>
             {
-                res.BundleIdInformation?.Print();
-            });
+                res.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task List(string token)
+        public static async Task List(string token, bool outJson)
         {
             var result = await token.GetClient().BundleIds.ListBundleIds();
             result.Handle<BundleIdsResponse>(res =>
             {
-                var count = 0;
-                if (res.BundleIdInformations is null || !res.BundleIdInformations.Any())
-                {
-                    Console.WriteLine("No BundleIds");
-                }
-                else
-                {
-                    foreach (var bundleId in res.BundleIdInformations)
-                    {
-                        Console.WriteLine($"------------ BundleId {++count} ----------");
-                        bundleId.Print();
-                    }
-                }
-            });
+                res.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task RegisterFromFile(FileInfo file, string token)
+        public static async Task RegisterFromFile(FileInfo file, string token, bool outJson)
         {
             var json = await file.OpenText().ReadToEndAsync();
-            await RegisterFromJson(json, token);
+            await RegisterFromJson(json, token, outJson);
         }
 
-        public static async Task RegisterFromJson(string json, string token)
+        public static async Task RegisterFromJson(string json, string token, bool outJson)
         {
             BundleIdCreateRequest? payload = null;
             try
@@ -342,17 +281,17 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().BundleIds.RegisterBundleId(payload);
             result.Handle<BundleIdResponse>(res =>
             {
-                res?.BundleIdInformation?.Print();
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task UpdateFromFile(string bundleIdId, FileInfo file, string token)
+        public static async Task UpdateFromFile(string bundleIdId, FileInfo file, string token, bool outJson)
         {
             var json = await file.OpenText().ReadToEndAsync();
-            await UpdateFromJson(bundleIdId, json, token);
+            await UpdateFromJson(bundleIdId, json, token, outJson);
         }
 
-        public static async Task UpdateFromJson(string bundleIdId, string json, string token)
+        public static async Task UpdateFromJson(string bundleIdId, string json, string token, bool outJson)
         {
             BundleIdUpdateRequest? payload = null;
             try
@@ -391,8 +330,8 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().BundleIds.UpdateBundleId(bundleIdId, payload);
             result.Handle<BundleIdResponse>(res =>
             {
-                res?.BundleIdInformation?.Print();
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
     }
 }

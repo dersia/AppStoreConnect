@@ -51,10 +51,7 @@ namespace AppStoreConnectCli.Commands
             update.AddArgument(new Argument<string>("deviceId"));
             update.AddSubCommandArgument();
             update.AddOption(new Option<string?>("--name"));
-            update.AddOption(new Option<DeviceClass>("--class"));
-            update.AddOption(new Option<BundleIdPlatform>("--platform"));
-            update.AddOption(new Option<string>("--udid"));
-            update.AddOption(new Option<string?>("--model"));
+            update.AddOption(new Option<DeviceStatus>("--status"));
             update.Handler = CommandHandler.Create(typeof(Devices).GetMethod(nameof(Update)));
 
             var updateFromJson = new Command("updateFromJson", "update a device from device json");
@@ -99,59 +96,34 @@ namespace AppStoreConnectCli.Commands
             return devices;
         }
 
-        public static async Task List(string token)
+        public static async Task List(string token, bool outJson)
         {
             var result = await token.GetClient().Devices.ListDevices();
             result.Handle<DevicesResponse>(res =>
             {
-                if (res.Devices is null || !res.Devices.Any())
-                {
-                    Console.WriteLine("No Devices");
-                }
-                else
-                {
-                    var count = 0;
-                    foreach (var device in res.Devices)
-                    {
-                        Console.WriteLine($"------------ Device {++count} ----------");
-                        device?.Print();
-                    }
-                }
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Get(string deviceId, string token)
+        public static async Task Get(string deviceId, string token, bool outJson)
         {
             var result = await token.GetClient().Devices.GetDevice(deviceId);
             result.Handle<DeviceResponse>(res =>
             {
-                res?.DeviceInformation?.Print();
-                Console.WriteLine(JsonSerializer.Serialize(res, new JsonSerializerOptions { IgnoreNullValues = true }));
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Update(string deviceId, string? name, string? model, DeviceClass? @class, BundleIdPlatform? platform, string? udid, string token)
+        public static async Task Update(string deviceId, string? name, DeviceStatus? status, string token, bool outJson)
         {
             var device = new AppStoreConnect.Models.Pocos.Devices.Device();
-            if (!string.IsNullOrWhiteSpace(model))
-            {
-                device.Model = model;
-            }
             if (!string.IsNullOrWhiteSpace(name))
             {
                 device.Name = name;
             }
-            if (!string.IsNullOrWhiteSpace(udid))
+            if (status is { })
             {
-                device.Udid = udid;
-            }
-            if (@class is { })
-            {
-                device.DeviceClass = @class;
-            }
-            if (platform is { })
-            {
-                device.Platform = platform;
+                device.Status = status;
             }
             var payload = new DeviceUpdateRequest()
             {
@@ -165,11 +137,11 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().Devices.UpdateDevice(deviceId, payload);
             result.Handle<DeviceResponse>(res =>
             {
-                res?.DeviceInformation?.Print();
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task Register(string name, string? model, DeviceClass @class, BundleIdPlatform platform, string udid, string token)
+        public static async Task Register(string name, string? model, DeviceClass @class, BundleIdPlatform platform, string udid, string token, bool outJson)
         {
             var device = new AppStoreConnect.Models.Pocos.Devices.Device
             {
@@ -193,17 +165,17 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().Devices.RegisterDevice(payload);
             result.Handle<DeviceResponse>(res =>
             {
-                res?.DeviceInformation?.Print();
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task RegisterFromFile(FileInfo file, string token)
+        public static async Task RegisterFromFile(FileInfo file, string token, bool outJson)
         {
             var json = await file.OpenText().ReadToEndAsync();
-            await RegisterFromJson(json, token);
+            await RegisterFromJson(json, token, outJson);
         }
 
-        public static async Task RegisterFromJson(string json, string token)
+        public static async Task RegisterFromJson(string json, string token, bool outJson)
         {
             DeviceCreateRequest? payload = null;
             try
@@ -241,17 +213,17 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().Devices.RegisterDevice(payload);
             result.Handle<DeviceResponse>(res =>
             {
-                res?.DeviceInformation?.Print();
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
 
-        public static async Task UpdateFromFile(string deviceId, FileInfo file, string token)
+        public static async Task UpdateFromFile(string deviceId, FileInfo file, string token, bool outJson)
         {
             var json = await file.OpenText().ReadToEndAsync();
-            await UpdateFromJson(deviceId, json, token);
+            await UpdateFromJson(deviceId, json, token, outJson);
         }
 
-        public static async Task UpdateFromJson(string deviceId, string json, string token)
+        public static async Task UpdateFromJson(string deviceId, string json, string token, bool outJson)
         {
             DeviceUpdateRequest? payload = null;
             try
@@ -290,8 +262,8 @@ namespace AppStoreConnectCli.Commands
             var result = await token.GetClient().Devices.UpdateDevice(deviceId, payload);
             result.Handle<DeviceResponse>(res =>
             {
-                res?.DeviceInformation?.Print();
-            });
+                res?.Print(outJson);
+            }, outJson);
         }
     }
 }

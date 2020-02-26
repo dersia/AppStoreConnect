@@ -19,6 +19,7 @@ namespace AppStoreConnectCli
         static async Task Main(string[] args)
         {
             var command = new RootCommand();
+            command.AddGlobalOption(new Option<bool>(new[] { "--out-json", "-oj" }, () => false) { Argument = new Argument<bool> { Arity = ArgumentArity.ZeroOrOne } });
             command.AddCommand(BundleIds.CreateBundleIds());
             command.AddCommand(BundleIdCapabilities.CreateBundleIdCapabilities());
             command.AddCommand(Certificates.CreateCertificates());

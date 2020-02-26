@@ -31,278 +31,86 @@ namespace AppStoreConnectCli.Commands
             create.AddOption(new Option<string[]>("--certificateId") { Argument = new Argument<string[]>() { Arity = ArgumentArity.OneOrMore } });
             create.AddOption(new Option<string>("--bundleIdId") { Argument = new Argument<string>() { Arity = ArgumentArity.ExactlyOne } });
             create.AddSubCommandArgument();
-            create.Handler = CommandHandler.Create(
-                async (string name, ProfileType type, string token, string[] deviceId, string[] certificateId, string bundleIdId) =>
-                {
-                    var profile = new AppStoreConnect.Models.Pocos.Profiles.Profile
-                    {
-                        Name = name,
-                        ProfileType = type
-                    };
-                    var devices = new List<Data>();
-                    var certificates = new List<Data>();
-                    foreach(var device in deviceId)
-                    {
-                        devices.Add(new Data { Id = device, Type = ResourceTypes.devices });
-                    }
-                    foreach (var certificate in certificateId)
-                    {
-                        certificates.Add(new Data { Id = certificate, Type = ResourceTypes.certificates });
-                    }
-                    var payload = new ProfileCreateRequest()
-                    {
-                        ProfileInformation = new AppStoreConnect.Models.Pocos.Profiles.ProfileInformation
-                        {
-                            Type = ResourceTypes.profiles,
-                            Profile = profile,
-                            Relationships = new AppStoreConnect.Models.Pocos.Profiles.ProfileRelationships
-                            {
-                                BundleId = new Relationship { Id = new Data { Id = bundleIdId, Type = ResourceTypes.bundleIds } },
-                                CertificateIds = new Relationships { Ids = certificates },
-                                Devices = new Relationships { Ids = devices }
-                            }
-                        }
-                    };
-                    Console.WriteLine(JsonSerializer.Serialize(payload, new JsonSerializerOptions { IgnoreNullValues = true }));
-                    var result = await token.GetClient().Profiles.CreateProfile(payload);
-                    result.Handle<ProfileResponse>(res =>
-                    {
-                        res.ProfileInformation?.Print(false);
-                    });
-            });
+            create.Handler = CommandHandler.Create(typeof(Profiles).GetMethod(nameof(Create)));
 
             var createFromJson = new Command("createFromJson", "create a new profile from profile json");
             createFromJson.AddAlias("cjson");
             createFromJson.AddAlias("cj");
             createFromJson.AddSubCommandArgument();
             createFromJson.AddArgument(new Argument<string>("json"));
-            createFromJson.Handler = CommandHandler.Create(async (string json, string token) => await CreateFromJson(json, token));
+            createFromJson.Handler = CommandHandler.Create(typeof(Profiles).GetMethod(nameof(CreateFromJson)));
 
             var createFromFile = new Command("createFromFile", "create a new profile from profile json file");
             createFromFile.AddAlias("cfile");
             createFromFile.AddAlias("cf");
             createFromFile.AddSubCommandArgument();
             createFromFile.AddArgument(new Argument<FileInfo>("file"));
-            createFromFile.Handler = CommandHandler.Create(async (FileInfo file, string token) => 
-            {
-                var json = await file.OpenText().ReadToEndAsync();
-                await CreateFromJson(json, token);
-            });
+            createFromFile.Handler = CommandHandler.Create(typeof(Profiles).GetMethod(nameof(CreateFromFile)));
 
             var delete = new Command("delete", "delete a profile by its id");
             delete.AddAlias("d");
             delete.AddArgument(new Argument<string>("profileId"));
             delete.AddSubCommandArgument();
-            delete.Handler = CommandHandler.Create(
-                async (string profileId, string token) =>
-                {
-                    var result = await token.GetClient().Profiles.DeleteProfile(profileId);
-                    result.Handle<NoContentResponse>(res =>
-                    {
-                        Console.WriteLine($"Profile '{profileId}' deleted");
-                    });
-                });
+            delete.Handler = CommandHandler.Create(typeof(Profiles).GetMethod(nameof(Delete)));
 
             var get = new Command("get", "get a profile by its id");
             get.AddAlias("g");
             get.AddArgument(new Argument<string>("profileId"));
             get.AddSubCommandArgument();
-            get.Handler = CommandHandler.Create(async (string profileId, string token) => 
-            {
-                var result = await token.GetClient().Profiles.GetProfile(profileId);
-                result.Handle<ProfileResponse>(res =>
-                {
-                    res?.ProfileInformation?.Print();
-                });
-            });
+            get.Handler = CommandHandler.Create(typeof(Profiles).GetMethod(nameof(Get)));
 
             var getContent = new Command("getContent", "get a profile content by its id");
             getContent.AddAlias("gc");
             getContent.AddArgument(new Argument<string>("profileId"));
             getContent.AddSubCommandArgument();
-            getContent.Handler = CommandHandler.Create(async (string profileId, string token) =>
-            {
-                var result = await token.GetClient().Profiles.GetProfile(profileId);
-                result.Handle<ProfileResponse>(res =>
-                {
-                    res?.ProfileInformation?.Print();
-                });
-            });
+            getContent.Handler = CommandHandler.Create(typeof(Profiles).GetMethod(nameof(GetContent)));
 
             var getNoContent = new Command("getEntry", "get a profile by its id (without content)");
             getNoContent.AddAlias("ge");
             getNoContent.AddArgument(new Argument<string>("profileId"));
             getNoContent.AddSubCommandArgument();
-            getNoContent.Handler = CommandHandler.Create(async (string profileId, string token) =>
-            {
-                var result = await token.GetClient().Profiles.GetProfile(profileId);
-                result.Handle<ProfileResponse>(res =>
-                {
-                    res?.ProfileInformation?.Print();
-                });
-            });
+            getNoContent.Handler = CommandHandler.Create(typeof(Profiles).GetMethod(nameof(GetEntry)));
 
             var list = new Command("list", "list all profiles");
             list.AddAlias("l");
             list.AddSubCommandArgument();
-            list.Handler = CommandHandler.Create(async (string token) =>
-            {
-                var result = await token.GetClient().Profiles.ListProfiles();
-                result.Handle<ProfilesResponse>(res =>
-                {
-                    if (res.Profiles is null || !res.Profiles.Any())
-                    {
-                        Console.WriteLine("No Profiles");
-                    }
-                    else
-                    {
-                        var count = 0;
-                        foreach (var profile in res.Profiles)
-                        {
-                            Console.WriteLine($"------------ Profile {++count} ----------");
-                            profile?.Print(false);
-                        }
-                    }
-                });
-            });
+            list.Handler = CommandHandler.Create(typeof(Profiles).GetMethod(nameof(List)));
 
             var linkedBundleId = new Command("linkedBundleId", "get bundleId linked to a profile");
-            linkedBundleId.AddAlias("lbi");
-            linkedBundleId.AddAlias("llbi");
             linkedBundleId.AddAlias("bundleId");
             linkedBundleId.AddArgument(new Argument<string>("profileId"));
             linkedBundleId.AddSubCommandArgument();
-            linkedBundleId.Handler = CommandHandler.Create(async (string profileId, string token) =>
-            {
-                var result = await token.GetClient().Profiles.GetLinkedBundleId(profileId);
-                result.Handle<BundleIdResponse>(res =>
-                {
-                    res.BundleIdInformation?.Print();
-                });
-            });
+            linkedBundleId.Handler = CommandHandler.Create(typeof(Profiles).GetMethod(nameof(BundleId)));
 
             var linkedBundleIdIds = new Command("linkedBundleIdId", "get bundleIdId linked to a profile");
-            linkedBundleIdIds.AddAlias("lbiid");
-            linkedBundleIdIds.AddAlias("llbiid");
             linkedBundleIdIds.AddAlias("bundleIdId");
             linkedBundleIdIds.AddArgument(new Argument<string>("profileId"));
             linkedBundleIdIds.AddSubCommandArgument();
-            linkedBundleIdIds.Handler = CommandHandler.Create(async (string profileId, string token) =>
-            {
-                var result = await token.GetClient().Profiles.GetLinkedBundleIdId(profileId);
-                result.Handle<ProfileBundleIdLinkageResponse>(res =>
-                {
-                    res.BundleIdId?.Print();
-                });
-            });
+            linkedBundleIdIds.Handler = CommandHandler.Create(typeof(Profiles).GetMethod(nameof(BundleIdId)));
 
             var linkedCertificates = new Command("linkedCertificates", "list all certificates linked to a profile");
-            linkedCertificates.AddAlias("lc");
-            linkedCertificates.AddAlias("llc");
             linkedCertificates.AddAlias("certificates");
             linkedCertificates.AddArgument(new Argument<string>("profileId"));
             linkedCertificates.AddSubCommandArgument();
-            linkedCertificates.Handler = CommandHandler.Create(async (string profileId, string token) =>
-            {
-                var result = await token.GetClient().Profiles.GetLinkedCertificates(profileId);
-                result.Handle<CertificatesResponse>(res =>
-                {
-                    if (res.Certificates is null || !res.Certificates.Any())
-                    {
-                        Console.WriteLine("No Certificates");
-                    }
-                    else
-                    {
-                        var count = 0;
-                        foreach (var certificate in res.Certificates)
-                        {
-                            Console.WriteLine($"------------ Certificate {++count} ----------");
-                            certificate?.Print(false);
-                        }
-                    }
-                });
-            });
+            linkedCertificates.Handler = CommandHandler.Create(typeof(Profiles).GetMethod(nameof(Certificates)));
 
             var linkedCertificateIds = new Command("linkedCertificateIds", "list all certificateIds linked to a profile");
-            linkedCertificateIds.AddAlias("lcid");
-            linkedCertificateIds.AddAlias("llcid");
             linkedCertificateIds.AddAlias("certificateIds");
             linkedCertificateIds.AddArgument(new Argument<string>("profileId"));
             linkedCertificateIds.AddSubCommandArgument();
-            linkedCertificateIds.Handler = CommandHandler.Create(async (string profileId, string token) =>
-            {
-                var result = await token.GetClient().Profiles.GetLinkedCertificateIds(profileId);
-                result.Handle<ProfileCertificatesLinkagesResponse>(res =>
-                {
-                    if (res.Certificates is null || !res.Certificates.Any())
-                    {
-                        Console.WriteLine("No Certificates");
-                    }
-                    else
-                    {
-                        var count = 0;
-                        foreach (var certificate in res.Certificates)
-                        {
-                            Console.WriteLine($"------------ Certificate {++count} ----------");
-                            certificate?.Print();
-                        }
-                    }
-                });
-            });
+            linkedCertificateIds.Handler = CommandHandler.Create(typeof(Profiles).GetMethod(nameof(CertificateIds)));
 
             var linkedDevices = new Command("linkedDevices", "list all devices linked to a profile");
-            linkedDevices.AddAlias("ld");
-            linkedDevices.AddAlias("lld");
             linkedDevices.AddAlias("devices");
             linkedDevices.AddArgument(new Argument<string>("profileId"));
             linkedDevices.AddSubCommandArgument();
-            linkedDevices.Handler = CommandHandler.Create(async (string profileId, string token) =>
-            {
-                var result = await token.GetClient().Profiles.GetLinkedDevices(profileId);
-                result.Handle<DevicesResponse>(res =>
-                {
-                    if (res.Devices is null || !res.Devices.Any())
-                    {
-                        Console.WriteLine("No Devices");
-                    }
-                    else
-                    {
-                        var count = 0;
-                        foreach (var device in res.Devices)
-                        {
-                            Console.WriteLine($"------------ Device {++count} ----------");
-                            device?.Print();
-                        }
-                    }
-                });
-            });
+            linkedDevices.Handler = CommandHandler.Create(typeof(Profiles).GetMethod(nameof(Devices)));
 
             var linkedDeviceIds = new Command("linkedDeviceIds", "list all deviceIds linked to a profile");
-            linkedDeviceIds.AddAlias("ldid");
-            linkedDeviceIds.AddAlias("lldid");
             linkedDeviceIds.AddAlias("deviceIds");
             linkedDeviceIds.AddArgument(new Argument<string>("profileId"));
             linkedDeviceIds.AddSubCommandArgument();
-            linkedDeviceIds.Handler = CommandHandler.Create(async (string profileId, string token) =>
-            {
-                var result = await token.GetClient().Profiles.GetLinkedDeviceIds(profileId);
-                result.Handle<ProfileDevicesLinkagesResponse>(res =>
-                {
-                    if (res.Devices is null || !res.Devices.Any())
-                    {
-                        Console.WriteLine("No Devices");
-                    }
-                    else
-                    {
-                        var count = 0;
-                        foreach (var device in res.Devices)
-                        {
-                            Console.WriteLine($"------------ Device {++count} ----------");
-                            device?.Print();
-                        }
-                    }
-                });
-            });
+            linkedDeviceIds.Handler = CommandHandler.Create(typeof(Profiles).GetMethod(nameof(Devices)));
 
             var profiles = new Command("profiles", "create, get, list or delete profiles")
             {
@@ -325,7 +133,211 @@ namespace AppStoreConnectCli.Commands
             return profiles;
         }
 
-        private static async Task CreateFromJson(string json, string token)
+        public static async Task DeviceIds(string profileId, string token)
+        {
+            var result = await token.GetClient().Profiles.GetLinkedDeviceIds(profileId);
+            result.Handle<ProfileDevicesLinkagesResponse>(res =>
+            {
+                if (res.Devices is null || !res.Devices.Any())
+                {
+                    Console.WriteLine("No Devices");
+                }
+                else
+                {
+                    var count = 0;
+                    foreach (var device in res.Devices)
+                    {
+                        Console.WriteLine($"------------ Device {++count} ----------");
+                        device?.Print();
+                    }
+                }
+            });
+        }
+
+        public static async Task Devices(string profileId, string token)
+        {
+            var result = await token.GetClient().Profiles.GetLinkedDevices(profileId);
+            result.Handle<DevicesResponse>(res =>
+            {
+                if (res.Devices is null || !res.Devices.Any())
+                {
+                    Console.WriteLine("No Devices");
+                }
+                else
+                {
+                    var count = 0;
+                    foreach (var device in res.Devices)
+                    {
+                        Console.WriteLine($"------------ Device {++count} ----------");
+                        device?.Print();
+                    }
+                }
+            });
+        }
+
+        public static async Task CertificateIds(string profileId, string token)
+        {
+            var result = await token.GetClient().Profiles.GetLinkedCertificateIds(profileId);
+            result.Handle<ProfileCertificatesLinkagesResponse>(res =>
+            {
+                if (res.Certificates is null || !res.Certificates.Any())
+                {
+                    Console.WriteLine("No Certificates");
+                }
+                else
+                {
+                    var count = 0;
+                    foreach (var certificate in res.Certificates)
+                    {
+                        Console.WriteLine($"------------ Certificate {++count} ----------");
+                        certificate?.Print();
+                    }
+                }
+            });
+        }
+
+        public static async Task Certificates(string profileId, string token)
+        {
+            var result = await token.GetClient().Profiles.GetLinkedCertificates(profileId);
+            result.Handle<CertificatesResponse>(res =>
+            {
+                if (res.Certificates is null || !res.Certificates.Any())
+                {
+                    Console.WriteLine("No Certificates");
+                }
+                else
+                {
+                    var count = 0;
+                    foreach (var certificate in res.Certificates)
+                    {
+                        Console.WriteLine($"------------ Certificate {++count} ----------");
+                        certificate?.Print(false);
+                    }
+                }
+            });
+        }
+
+        public static async Task BundleIdId(string profileId, string token)
+        {
+            var result = await token.GetClient().Profiles.GetLinkedBundleIdId(profileId);
+            result.Handle<ProfileBundleIdLinkageResponse>(res =>
+            {
+                res.BundleIdId?.Print();
+            });
+        }
+
+        public static async Task BundleId(string profileId, string token)
+        {
+            var result = await token.GetClient().Profiles.GetLinkedBundleId(profileId);
+            result.Handle<BundleIdResponse>(res =>
+            {
+                res.BundleIdInformation?.Print();
+            });
+        }
+
+        public static async Task List(string token)
+        {
+            var result = await token.GetClient().Profiles.ListProfiles();
+            result.Handle<ProfilesResponse>(res =>
+            {
+                if (res.Profiles is null || !res.Profiles.Any())
+                {
+                    Console.WriteLine("No Profiles");
+                }
+                else
+                {
+                    var count = 0;
+                    foreach (var profile in res.Profiles)
+                    {
+                        Console.WriteLine($"------------ Profile {++count} ----------");
+                        profile?.Print(false);
+                    }
+                }
+            });
+        }
+
+        public static async Task GetEntry(string profileId, string token)
+        {
+            var result = await token.GetClient().Profiles.GetProfile(profileId);
+            result.Handle<ProfileResponse>(res =>
+            {
+                res?.ProfileInformation?.Print(false);
+            });
+        }
+
+        public static async Task GetContent(string profileId, string token)
+        {
+            var result = await token.GetClient().Profiles.GetProfile(profileId);
+            result.Handle<ProfileResponse>(res =>
+            {
+                Console.WriteLine(res.ProfileInformation?.Profile?.ProfileContent);
+            });
+        }
+
+        public static async Task Get(string profileId, string token)
+        {
+            var result = await token.GetClient().Profiles.GetProfile(profileId);
+            result.Handle<ProfileResponse>(res =>
+            {
+                res?.ProfileInformation?.Print();
+            });
+        }
+
+        public static async Task Delete(string profileId, string token)
+        {
+            var result = await token.GetClient().Profiles.DeleteProfile(profileId);
+            result.Handle<NoContentResponse>(res =>
+            {
+                Console.WriteLine($"Profile '{profileId}' deleted");
+            });
+        }
+
+        public static async Task Create(string name, ProfileType type, string token, string[] deviceId, string[] certificateId, string bundleIdId)
+        {
+            var profile = new AppStoreConnect.Models.Pocos.Profiles.Profile
+            {
+                Name = name,
+                ProfileType = type
+            };
+            var devices = new List<Data>();
+            var certificates = new List<Data>();
+            foreach (var device in deviceId)
+            {
+                devices.Add(new Data { Id = device, Type = ResourceTypes.devices });
+            }
+            foreach (var certificate in certificateId)
+            {
+                certificates.Add(new Data { Id = certificate, Type = ResourceTypes.certificates });
+            }
+            var payload = new ProfileCreateRequest()
+            {
+                ProfileInformation = new AppStoreConnect.Models.Pocos.Profiles.ProfileInformation
+                {
+                    Type = ResourceTypes.profiles,
+                    Profile = profile,
+                    Relationships = new AppStoreConnect.Models.Pocos.Profiles.ProfileRelationships
+                    {
+                        BundleId = new Relationship { Id = new Data { Id = bundleIdId, Type = ResourceTypes.bundleIds } },
+                        CertificateIds = new Relationships { Ids = certificates },
+                        Devices = new Relationships { Ids = devices }
+                    }
+                }
+            };
+            Console.WriteLine(JsonSerializer.Serialize(payload, new JsonSerializerOptions { IgnoreNullValues = true }));
+            var result = await token.GetClient().Profiles.CreateProfile(payload);
+            result.Handle<ProfileResponse>(res =>
+            {
+                res.ProfileInformation?.Print(false);
+            });
+        }
+
+        public static async Task CreateFromFile(FileInfo file, string token)
+        {
+            var json = await file.OpenText().ReadToEndAsync();
+            await CreateFromJson(json, token);
+        }
+
+        public static async Task CreateFromJson(string json, string token)
         {
             ProfileCreateRequest? payload = null;
             try

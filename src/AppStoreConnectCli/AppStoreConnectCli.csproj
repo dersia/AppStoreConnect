@@ -11,7 +11,7 @@
     <AssemblyName>appStoreConnect</AssemblyName>
     <RootNamespace>AppStoreConnectCli</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.2.5.0</Version>
+    <Version>0.2.5.1</Version>
     <Authors>Sia Consulting Ltd.</Authors>
     <Product>AppStoreConnectCli</Product>
     <PackageId>SiaConsulting.AppStoreConnect.Cli</PackageId>

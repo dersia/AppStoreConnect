@@ -24,18 +24,18 @@ This app is available as a [dotnet tool](https://docs.microsoft.com/en-us/dotnet
 ### dotnet tool
 To install this app as a dotnet tool run from command line
 ```bash
-dotnet tool install SiaConsulting.AppStoreConnect.Cli --version 0.2.5 --no-cache --global
+dotnet tool install SiaConsulting.AppStoreConnect.Cli --version 0.3 --no-cache --global
 ```
 Update from an older version
 ```bash
-dotnet tool update SiaConsulting.AppStoreConnect.Cli --version 0.2.5 --no-cache --global
+dotnet tool update SiaConsulting.AppStoreConnect.Cli --version 0.3 --no-cache --global
 ```
 ### self contained
-[Win x64](https://github.com/dersia/AppStoreConnect/releases/download/v0.2.5/appStoreConnect-win-x64.zip)
+[Win x64](https://github.com/dersia/AppStoreConnect/releases/download/v0.3/appStoreConnect-win-x64.zip)
 
-[MacOS](https://github.com/dersia/AppStoreConnect/releases/download/v0.2.5/appStoreConnect-osx-x64.zip)
+[MacOS](https://github.com/dersia/AppStoreConnect/releases/download/v0.3/appStoreConnect-osx-x64.zip)
 
-[Linux](https://github.com/dersia/AppStoreConnect/releases/download/v0.2.5/appStoreConnect-linux-x64.tar.gz)
+[Linux](https://github.com/dersia/AppStoreConnect/releases/download/v0.3/appStoreConnect-linux-x64.tar.gz)
 
 ## Usage
 
@@ -215,11 +215,11 @@ Commands:
 #### Creating a certificate
 To create a certificate you'll need a `Certificate Signing Request (CSR)`. To make it easier to create one you can just use a build-in cert-tool.
 ```bash
-$ ./appStoreConnect.exe tools cert csr <COMMON NAME> <COUNTRY CODE> -o ./certificate-request.csr
+$ ./appStoreConnect.exe tools cert csr <COMMON NAME> <COUNTRY CODE> -ofc ./certificate-request.csr -ofpub ./certificate-public.key -ofpriv ./certificate-private.pem
 ```
 There is also an `interactive`-mode of CSR creation
 ```bash
-$ ./appStoreConnect.exe tools cert csri -o ./certificate-request.csr
+$ ./appStoreConnect.exe tools cert csri -ofc ./certificate-request.csr -ofpub ./certificate-public.key -ofpriv ./certificate-private.pem
 Creating a Certificate Signing Request
 Country Code* [C]: DE
 State or Province [ST]:
@@ -257,7 +257,7 @@ $ ./appStoreConnect.exe certificates gc <CERTIFIACTE-ID> <BEARER-TOKEN> > ./cert
 To sign your app with that Certificate, you need to convert your CER Certificate to a PKCS12 Certificate.
 To make it easier you can use a built-in tool to create a PKCS12 certificate.
 ```bash
-$ ./appStoreConnect.exe tools cert p12FromFile ./certificate.cer --password <PASSWORD> -o ./certificate.p12
+$ ./appStoreConnect.exe tools cert p12FromFile ./certificate.cer --private-key ./certificate-private.pem --password <PASSWORD> -of ./certificate.p12
 ```
 
 Here is the help output of the certifiactes command

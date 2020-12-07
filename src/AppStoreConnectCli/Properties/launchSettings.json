@@ -2,7 +2,8 @@
   "profiles": {
     "AppStoreConnectCli": {
       "commandName": "Project",
-      "commandLineArgs": "p bundleIds TWQQ3US93W eyJhbGciOiJFUzI1NiIsImtpZCI6IkpWRjlZNTQ4NVMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiI2OWE2ZGU4Zi0yMTJhLTQ3ZTMtZTA1My01YjhjN2MxMWE0ZDEiLCJhdWQiOiJhcHBzdG9yZWNvbm5lY3QtdjEiLCJleHAiOjE1ODI1Mzg5NTJ9.PWV9zcfWXpqxZsBYGv5mH_goNIsTjaodWCboJv73fEEVVkytx5irRe3tKHCyNQRTVMmrigScEfNFeeE26C73oA"
+      "commandLineArgs": "p bundleIds TWQQ3US93W eyJhbGciOiJFUzI1NiIsImtpZCI6IkpWRjlZNTQ4NVMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiI2OWE2ZGU4Zi0yMTJhLTQ3ZTMtZTA1My01YjhjN2MxMWE0ZDEiLCJhdWQiOiJhcHBzdG9yZWNvbm5lY3QtdjEiLCJleHAiOjE1ODI1Mzg5NTJ9.PWV9zcfWXpqxZsBYGv5mH_goNIsTjaodWCboJv73fEEVVkytx5irRe3tKHCyNQRTVMmrigScEfNFeeE26C73oA",
+      "remoteDebugEnabled": false
     }
   }
 }

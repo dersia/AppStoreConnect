@@ -14,7 +14,7 @@ namespace AppStoreConnectCli.CertificateTools
 {
     public class CertUtil
     {
-        public Pkcs10CertificationRequest CreateCertificateSigningRequestInteractive(int keyLength)
+        public (Pkcs10CertificationRequest csr, AsymmetricCipherKeyPair? keyPair) CreateCertificateSigningRequestInteractive(int keyLength)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Creating a Certificate Signing Request");
@@ -25,9 +25,9 @@ namespace AppStoreConnectCli.CertificateTools
             var unit = GetOrganizationalUnit();
             var commonName = GetCommonName();
             var email = GetEmailAddress();
-            var csr = CreateCertificateSigningRequest(commonName, countryCode, email, stateOrProvince, localityOrCity, company, unit, keyLength);
+            var (csr, keyPair) = CreateCertificateSigningRequest(commonName, countryCode, email, stateOrProvince, localityOrCity, company, unit, keyLength);
             Console.ResetColor();
-            return csr;
+            return (csr, keyPair);
 
             static string GetCountryCode()
             {
@@ -89,7 +89,7 @@ namespace AppStoreConnectCli.CertificateTools
             }
         }
 
-        public Pkcs10CertificationRequest CreateCertificateSigningRequest(string commonName, string countryCode, string? emailAddress, string? stateOrProvince = null, string? localityOrCity = null, string? companyName = null, string? unit = null, int keyLength = 2048)
+        public (Pkcs10CertificationRequest csr, AsymmetricCipherKeyPair? keyPair) CreateCertificateSigningRequest(string commonName, string countryCode, string? emailAddress, string? stateOrProvince = null, string? localityOrCity = null, string? companyName = null, string? unit = null, int keyLength = 2048)
         {
             if(keyLength < 1)
             {
@@ -121,19 +121,26 @@ namespace AppStoreConnectCli.CertificateTools
             var subject = new X509Name(builder.ToString());
             var randomGenerator = new CryptoApiRandomGenerator();
             var random = new SecureRandom(randomGenerator);
-            var subjectKeyPair = default(AsymmetricCipherKeyPair);
             var keyGenerationParameters = new KeyGenerationParameters(random, keyLength);
 
             var keyPairGenerator = new RsaKeyPairGenerator();
             keyPairGenerator.Init(keyGenerationParameters);
-            subjectKeyPair = keyPairGenerator.GenerateKeyPair();
-            var issuerKeyPair = subjectKeyPair;
+            var issuerKeyPair = keyPairGenerator.GenerateKeyPair();
 
             var csr = new Pkcs10CertificationRequest("SHA256WITHRSA", subject, issuerKeyPair.Public, null, issuerKeyPair.Private);
-            return csr;
+            return (csr, issuerKeyPair);
         }
 
-        public byte[] CreateP12(byte[] cer, string? password = null) 
-            => new X509Certificate2(cer).Export(X509ContentType.Pkcs12, password);
+        public byte[] CreateP12(byte[] cer, string? privateKey = null, string? password = null)
+        {
+            var cert = new X509Certificate2(cer);
+            if (privateKey is not null) 
+            {
+                using var rsa = RSA.Create();
+                rsa.ImportFromPem(privateKey);
+                cert = cert.CopyWithPrivateKey(rsa);
+            }
+            return cert.Export(X509ContentType.Pkcs12, password);
+        }
     }
 }

@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <LangVersion>8.0</LangVersion>
+    <TargetFramework>net5.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>appStoreConnect</ToolCommandName>
@@ -11,7 +11,7 @@
     <AssemblyName>appStoreConnect</AssemblyName>
     <RootNamespace>AppStoreConnectCli</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.2.5.1</Version>
+    <Version>0.3.0.0</Version>
     <Authors>Sia Consulting Ltd.</Authors>
     <Product>AppStoreConnectCli</Product>
     <PackageId>SiaConsulting.AppStoreConnect.Cli</PackageId>
@@ -21,6 +21,8 @@
     <PackageProjectUrl>https://github.com/dersia/AppStoreConnect</PackageProjectUrl>
     <RepositoryUrl>https://github.com/dersia/AppStoreConnect.git</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
+    <Nullable>enable</Nullable>
+    <RuntimeIdentifiers>win10-x64;osx-x64;linux-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,8 +32,7 @@
     <None Include="..\\..\\LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="BouncyCastle" Version="1.8.5" />
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20104.2" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />
   </ItemGroup>
 
 </Project>

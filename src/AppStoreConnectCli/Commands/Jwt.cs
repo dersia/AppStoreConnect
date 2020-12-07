@@ -14,7 +14,7 @@ namespace AppStoreConnectCli.Commands
         public static Command CreateJwt()
         {
             var fromFile = new Command("fromFile", "Create a Bearer Token from p8 cdrtificate, keyId and issuerId");
-            fromFile.AddArgument(new Argument<FileInfo>("p8Path"));
+            fromFile.AddArgument(new Argument<string>("p8Path"));
             fromFile.AddArgument(new Argument<string>("kid"));
             fromFile.AddArgument(new Argument<string>("issuer"));
             fromFile.AddOption(new Option<string?>("--audience") { Argument = new Argument<string?> { Arity = ArgumentArity.ZeroOrOne } });
@@ -42,13 +42,16 @@ namespace AppStoreConnectCli.Commands
             return jwt;
         }
 
-        public static void FromFile(FileSystemInfo p8Path, string kid, string issuer, string? audience)
+        public static void FromFile(string p8Path, string kid, string issuer, string? audience)
         {
-            var result = KeyUtils.CreateTokenAndSign(p8Path.FullName, kid, issuer, audience ?? "appstoreconnect-v1");
+            var fs = File.OpenRead(p8Path);
+            fs.Close();
+            fs.Dispose();
+            var result = KeyUtils.CreateTokenAndSign(p8Path, kid, issuer, audience ?? "appstoreconnect-v1");
             Console.WriteLine($"{result}");
         }
 
-        public static void FromConfig(FileSystemInfo configFilePath)
+        public static void FromConfig(FileInfo configFilePath)
         {
             Console.WriteLine($"");
         }

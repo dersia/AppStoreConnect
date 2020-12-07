@@ -1,63 +1,47 @@
-﻿using Org.BouncyCastle.Crypto.Parameters;
+﻿using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
-using Security.Cryptography;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Org.BouncyCastle.Security;
+using Org.BouncyCastle.Crypto;
 
 namespace AppStoreConnect.Jwt
 {
     public static class KeyUtils
     {
-        public static CngKey GetPrivateKey(string p8FilePath)
+        private static void GetPrivateKey(TextReader reader, ECDsa ecDSA)
         {
-            using var reader = File.OpenText(p8FilePath);
             var ecPrivateKeyParameters = (ECPrivateKeyParameters)new PemReader(reader).ReadObject();
-            var x = ecPrivateKeyParameters.Parameters.G.AffineXCoord.GetEncoded();
-            var y = ecPrivateKeyParameters.Parameters.G.AffineYCoord.GetEncoded();
+            var q = ecPrivateKeyParameters.Parameters.G.Multiply(ecPrivateKeyParameters.D);
+            var pub = new ECPublicKeyParameters(ecPrivateKeyParameters.AlgorithmName, q, ecPrivateKeyParameters.PublicKeyParamSet);
+            var x = pub.Q.AffineXCoord.GetEncoded();
+            var y = pub.Q.AffineYCoord.GetEncoded();
             var d = ecPrivateKeyParameters.D.ToByteArrayUnsigned();
-            return EccKey.New(x, y, d);
+            var msEcp = new ECParameters { Curve = ECCurve.NamedCurves.nistP256, Q = { X = x, Y = y }, D = d };
+            msEcp.Validate();
+            ecDSA.ImportParameters(msEcp);
         }
 
-        public static CngKey GetPrivateKeyFromString(string p8FileContent)
-        {
-            using var reader = new StringReader(p8FileContent);
-            var ecPrivateKeyParameters = (ECPrivateKeyParameters)new PemReader(reader).ReadObject();
-            var x = ecPrivateKeyParameters.Parameters.G.AffineXCoord.GetEncoded();
-            var y = ecPrivateKeyParameters.Parameters.G.AffineYCoord.GetEncoded();
-            var d = ecPrivateKeyParameters.D.ToByteArrayUnsigned();
-            return EccKey.New(x, y, d);
-        }
+        private static TextReader GetReaderFromString(string p8FileContent) => new StringReader(p8FileContent);
+        private static TextReader GetReaderFromFile(string p8FileContent) => File.OpenText(p8FileContent);
 
         public static string CreateTokenAndSign(string privateKeyFilePath, string kid, string issuer, string audience, TimeSpan timeout = default)
         {
-            if(timeout == default)
-            {
-                timeout = TimeSpan.FromMinutes(20);
-            } 
-            else if(timeout.TotalMinutes > 20)
-            {
-                throw new ArgumentOutOfRangeException(nameof(timeout));
-            }
-            var privateKey = GetPrivateKey(privateKeyFilePath);
-            var epochNow = (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-            var expires = (int)DateTime.UtcNow.Add(timeout).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-            var payload = new Dictionary<string, object>
-            {
-                {"iss", issuer },
-                {"aud", audience },
-                {"exp", expires }
-            };
-            var extraHeaders = new Dictionary<string, object>
-            {
-                {"kid", kid },
-                {"typ", "JWT" }
-            };
-            return Jose.JWT.Encode(payload, privateKey, Jose.JwsAlgorithm.ES256, extraHeaders);
+            using var reader = GetReaderFromFile(privateKeyFilePath);
+            return CreateTokenAndSignInternal(reader, kid, issuer, audience, timeout);
         }
 
         public static string CreateTokenAndSignFromString(string privateKeyFileContent, string kid, string issuer, string audience, TimeSpan timeout = default)
+        {
+            using var reader = GetReaderFromString(privateKeyFileContent);
+            return CreateTokenAndSignInternal(reader, kid, issuer, audience, timeout);
+        }
+
+        private static string CreateTokenAndSignInternal(TextReader reader, string kid, string issuer, string audience, TimeSpan timeout = default)
         {
             if (timeout == default)
             {
@@ -67,21 +51,24 @@ namespace AppStoreConnect.Jwt
             {
                 throw new ArgumentOutOfRangeException(nameof(timeout));
             }
-            var privateKey = GetPrivateKeyFromString(privateKeyFileContent);
-            var epochNow = (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-            var expires = (int)DateTime.UtcNow.Add(timeout).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-            var payload = new Dictionary<string, object>
+            using var ecDSA = ECDsa.Create();
+            GetPrivateKey(reader, ecDSA);
+
+            var securityKey = new ECDsaSecurityKey(ecDSA) { KeyId = kid };
+            var credentials = new SigningCredentials(securityKey, Microsoft.IdentityModel.Tokens.SecurityAlgorithms.EcdsaSha256);
+
+            var descriptor = new SecurityTokenDescriptor
             {
-                {"iss", issuer },
-                {"aud", audience },
-                {"exp", expires }
+                Issuer = issuer,
+                Audience = audience,
+                Expires = DateTime.UtcNow.Add(timeout),
+                TokenType = "JWT",
+                SigningCredentials = credentials
             };
-            var extraHeaders = new Dictionary<string, object>
-            {
-                {"kid", kid },
-                {"typ", "JWT" }
-            };
-            return Jose.JWT.Encode(payload, privateKey, Jose.JwsAlgorithm.ES256, extraHeaders);
+
+            var handler = new Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler();
+            var encodedToken = handler.CreateToken(descriptor);
+            return encodedToken;
         }
     }
 }

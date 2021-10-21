@@ -32,6 +32,6 @@ namespace AppStoreConnect.Models.Enums
         AUTOFILL_CREDENTIAL_PROVIDER,
         ACCESS_WIFI_INFORMATION,
         FONT_INSTALLATION,
-
+        APPLE_ID_AUTH
     }
 }

@@ -10,6 +10,7 @@ namespace AppStoreConnect.Models.Enums
     {
         IOS,
         MAC_OS,
-        UNIVERSAL
+        UNIVERSAL,
+        SERVICES
     }
 }

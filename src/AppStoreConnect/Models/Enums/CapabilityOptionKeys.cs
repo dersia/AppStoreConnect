@@ -12,6 +12,7 @@ namespace AppStoreConnect.Models.Enums
         XCODE_6,
         COMPLETE_PROTECTION,
         PROTECTED_UNLESS_OPEN,
-        PROTECTED_UNTIL_FIRST_USER_AUTH
+        PROTECTED_UNTIL_FIRST_USER_AUTH,
+        PRIMARY_APP_CONSENT
     }
 }

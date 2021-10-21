@@ -15,6 +15,7 @@ namespace AppStoreConnect.Models.Enums
         MAC_APP_DEVELOPMENT,
         DEVELOPER_ID_KEXT,
         DEVELOPER_ID_APPLICATION, 
-        DEVELOPMENT
+        DEVELOPMENT,
+        DISTRIBUTION
     }
 }
